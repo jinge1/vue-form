@@ -5,7 +5,7 @@
       <ele-input v-else v-bind="item" @input="$emit('change', $event, index, item)"></ele-input>
     </div>
     <slot name="button" v-if="$slots.button"></slot>
-    <van-button v-else round block type="info" native-type="submit">提交</van-button>
+    <van-button v-else round block type="info" native-type="submit">{{buttonText}}</van-button>
   </van-form>
 </template>
 <script>
@@ -18,6 +18,10 @@ export default {
   props: {
     list: {
       type: Array
+    },
+    buttonText: {
+      type: String,
+      default: '提交'
     }
   },
   mounted() {

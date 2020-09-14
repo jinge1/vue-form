@@ -4,7 +4,11 @@
     <ele-form validate-first :list="list" @failed="onFailed" @submit="onSubmit" @change="change">
       <template v-for="item in list">
         <template v-if="item.type === 'slot'">
-          <div :key="item.nme" :slot="item.name" v-if="item.name.startsWith('top')">top--{{item}}</div>
+          <div
+            :key="item.nme"
+            :slot="item.name"
+            v-if="item.name.startsWith('top_list')"
+          >top--{{item}}</div>
         </template>
       </template>
       <div slot="button">
@@ -22,15 +26,14 @@ export default {
   },
   methods: {
     ...mutation,
-    change(v, index, item) {
-      console.log(v, index, item, '---')
-      this.updateItem(v, index, item)
-      if (index === 1 && v === '2') {
-        this.updateItem('8', 0, 'list')
+    change(v, index, item = {}) {
+      // console.log(v, index, item, '---')
+      this.updateItem(v, index)
+      const { origin = {} } = item
+      const { name } = origin
+      if (name === 'targetAddress') {
+        this.updateItem('8', index, item)
       }
-      // if (v === '2') {
-      //   this.updateItem(8, 1)
-      // }
     },
     onFailed(info) {
       console.log(info)
