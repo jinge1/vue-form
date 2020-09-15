@@ -22,17 +22,19 @@ import EleForm from '../components/EleForm'
 import { store, mutation } from './formConf'
 export default {
   components: {
-    EleForm
+    EleForm,
   },
   methods: {
     ...mutation,
-    change(v, index, item = {}) {
-      // console.log(v, index, item, '---')
+    change(v, index, item) {
+      const { originName, parentIndex } = item
       this.updateItem(v, index)
-      const { origin = {} } = item
-      const { name } = origin
-      if (name === 'targetAddress') {
-        this.updateItem('8', index, item)
+      if (originName === 'starAddress') {
+        this.updateItem(
+          { isShow: false, value: 'hello' },
+          parentIndex,
+          'targetAddress'
+        )
       }
     },
     onFailed(info) {
@@ -40,12 +42,12 @@ export default {
     },
     onSubmit(values) {
       console.log(values)
-    }
+    },
   },
   computed: {
     list() {
       return store
-    }
-  }
+    },
+  },
 }
 </script>

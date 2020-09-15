@@ -6,7 +6,6 @@ import vue from 'vue'
  * @param {Object|undefined} parentInfo 父级信息
  */
 function initList(list, parentInfo) {
-  console.log(parentInfo, 7890)
   return list.reduce((pre, curr) => {
     const { children, ...other } = curr
     if (Array.isArray(children) && children.length > 0) {
@@ -32,10 +31,12 @@ function initList(list, parentInfo) {
  */
 function madeItem(item, parent = {}) {
   const { name } = item
-  const { name: parentName, index } = parent
+  const { name: parentName, index: parentIndex } = parent
   const fieldName = getItemName(item, parent)
   const defaultConf = getDefaultConf(item)
-  const originInfo = parentName ? { origin: { parentName, index, name } } : {}
+  const originInfo = parentName
+    ? { parentName, parentIndex, originName: name }
+    : { originName: name }
   return { ...defaultConf, ...item, name: fieldName, ...originInfo }
 }
 
@@ -51,12 +52,16 @@ function getItemName(item, parent = {}) {
 }
 
 /**
- * 获取转换为一位数组后的name，避免name重复
- * @param {object} item 表单配置项
+ * 通过所在父级下标及原始名称查找所在列表坐标
+ * @param {number} index 所在父级中的下标
+ * @param {string} originName 原始name
+ * @param {Array} list 所有数据列表
  */
-function getItemIndex(item = {}, list) {
-  const { name } = item
-  return list.findIndex((l) => l.name === name)
+function getItemIndex(index, name, list) {
+  return list.findIndex(
+    ({ originName, parentIndex }) =>
+      name === originName && index === parentIndex
+  )
 }
 
 /**
@@ -86,27 +91,29 @@ function getDefaultConf(item) {
 /**
  * 生成表单局部store
  * @param {Array} list
- * @param {Boolean} isSaveScroll
  */
 export default function madeFormStore(list) {
   const store = vue.observable(initList(list))
   const mutation = {
-    updateItem(v, index, item) {
-      // const nextInfo =
-      //   typeof v === 'object' && !Array.isArray(v) ? v : { value: v }
+    /**
+     * 更新列表
+     * @param {string|number|object} v
+     * @param {number} index 当前项所在下标
+     * @param {string|undefined} originName 原始name
+     */
+    updateItem(v, index, originName) {
+      const nextInfo =
+        typeof v === 'object' && !Array.isArray(v) ? v : { value: v }
       const i =
-        item && Object.keys(item).length > 0 ? getItemIndex(item, store) : index
-      
-      // store[i] = { ...store[i], ...nextInfo }
-      store[i] = {value: '009'}
-      console.log(store)
-      // if (origin) {
-      //   // console.log(store[parent.index])
-      //   // store[parent.index].children[index].value = v
-      //   store[index].value = v
-      // } else {
-      //   store[index].value = v
-      // }
+        typeof originName === 'string' && originName.trim() !== ''
+          ? getItemIndex(index, originName, store)
+          : index
+      if (i > -1) {
+        // 只能逐项更新
+        Object.keys(nextInfo).forEach((k) => (store[i][k] = nextInfo[k]))
+      } else {
+        throw new Error(`${originName}-${index} is not fund`)
+      }
     },
   }
   return { store, mutation }
