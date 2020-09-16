@@ -1,12 +1,21 @@
 <template>
   <div>
+    <div>
+      <van-button round type="info" @click="add">添加</van-button>
+      <van-button round type="info" @click="del">删除</van-button>
+    </div>
     <ele-form
       validate-first
+      :list="list"
       @failed="onFailed"
-      :store="store"
-      :mutation="mutation"
       @submit="onSubmit"
+      @change="change"
+      :slotsList.sync="slotsList"
+      :values.sync="values"
     >
+      <template v-for="item in slotsList">
+        <div :key="item.nme" :slot="item.name">top--{{item}}</div>
+      </template>
       <div slot="button">
         <van-button round block type="info" native-type="submit">提交</van-button>
       </div>
@@ -15,49 +24,57 @@
 </template>
 <script>
 import EleForm from '../components/EleForm'
-import madeStore from './store'
-
-const formList = [
-  // type slot array form-input form-select
-  { name: 'name1', type: 'slot' },
-  { name: 'name2', label: '用户名2', required: true },
-  { name: 'name3', label: '用户名3', on: { input: (v) => console.log(v) } },
-  {
-    name: 'list',
-    type: 'array',
-    items: [
-      { name: 'name4', label: '用户名4', rules: [{ required: true }] },
-      { name: 'name5' },
-    ],
-  },
-  {
-    name: 'list2',
-    type: 'array',
-    items: [
-      { name: 'name4', label: '用户名4', rules: [{ required: true }] },
-      { name: 'name6' },
-    ],
-  },
-]
-const { store, mutation } = madeStore(formList)
+import { store, mutation } from './formConf'
 
 export default {
   components: {
-    'ele-form': EleForm,
+    EleForm,
   },
   data() {
     return {
-      // value: Date.now()
-      store,
-      mutation,
+      values: {},
+      slotsList: {},
     }
   },
   methods: {
+    ...mutation,
+    add() {
+      this.changeList('list', [
+        { name: 'cc0', component: 'slot' },
+        { name: 'cc', label: 'add' },
+        { name: 'cc2', label: 'add2' },
+      ])
+    },
+    del() {
+      this.changeList('list', 0)
+    },
     onFailed(info) {
       console.log(info)
     },
     onSubmit(values) {
       console.log(values)
+    },
+    change(v, item) {
+      this.updateList(v, item)
+      if (item.originName === 'customer') {
+        this.updateList(
+          { required: false },
+          {
+            originName: 'targetAddress',
+            parentName: 'list',
+            parentIndex: item.parentIndex,
+          }
+        )
+        // this.updateList(
+        //   { required: true },
+        //   'mobile'
+        // )
+      }
+    },
+  },
+  computed: {
+    list() {
+      return store
     },
   },
 }

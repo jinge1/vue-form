@@ -1,43 +1,40 @@
 import vue from 'vue'
 
 /**
- * 暂时只考虑最懂2级结构
- * @param {Array} list 表单配置列表
- * @param {Object|undefined} parentInfo 父级信息
+ *
+ * @param {*} item
  */
-function initList(list, parentInfo) {
-  return list.reduce((pre, curr) => {
-    const { children, ...other } = curr
-    if (Array.isArray(children) && children.length > 0) {
-      return [
-        ...pre,
-        ...children.reduce(
-          (childPre, childCurr, childIndex) => [
-            ...childPre,
-            ...initList(childCurr, { ...other, index: childIndex }),
-          ],
-          []
-        ),
-      ]
-    }
-    return [...pre, madeItem(other, parentInfo)]
-  }, [])
+function formatItem(item) {
+  const {
+    component = 'van-field',
+    label = '',
+    placeholder,
+    isShow = true,
+    required = false,
+    rules = [],
+  } = item
+  const tips = component === 'van-picker' ? `请选择${label}` : `请输入${label}`
+  if (component === 'slot') {
+    return { isShow, ...item }
+  }
+  const valueInfo = Array.isArray(item.children) ? {} : { value: '' }
+  return {
+    component,
+    isShow,
+    ...valueInfo,
+    placeholder: typeof placeholder === 'undefined' ? tips : placeholder,
+    rules: required ? [{ required: true, message: tips }, ...rules] : rules,
+    ...item,
+  }
 }
 
-/**
- * 根据原始配置创建表单项
- * @param {object} item 表单配置项
- * @param {object|undefined} parent 父级信息
- */
-function madeItem(item, parent = {}) {
-  const { name } = item
-  const { name: parentName, index: parentIndex } = parent
-  const fieldName = getItemName(item, parent)
-  const defaultConf = getDefaultConf(item)
-  const originInfo = parentName
-    ? { parentName, parentIndex, originName: name }
-    : { originName: name }
-  return { ...defaultConf, ...item, name: fieldName, ...originInfo }
+function initList(list) {
+  return list.map(({ children, ...other }) => {
+    if (Array.isArray(children)) {
+      return { ...other, children: children.map((c) => initList(c)) }
+    }
+    return formatItem(other)
+  })
 }
 
 /**
@@ -52,69 +49,72 @@ function getItemName(item, parent = {}) {
 }
 
 /**
- * 通过所在父级下标及原始名称查找所在列表坐标
- * @param {number} index 所在父级中的下标
- * @param {string} originName 原始name
- * @param {Array} list 所有数据列表
- */
-function getItemIndex(index, name, list) {
-  return list.findIndex(
-    ({ originName, parentIndex }) =>
-      name === originName && index === parentIndex
-  )
-}
-
-/**
- * 获取表单项默认配置
- * @param {object} item 表单项
- */
-function getDefaultConf(item) {
-  const {
-    type = 'van-field',
-    label = '',
-    placeholder,
-    required = false,
-    rules = [],
-  } = item
-  const tips = type === 'van-picker' ? `请选择${label}` : `请输入${label}`
-  if (type === 'slot') {
-    return {}
-  }
-  return {
-    value: '',
-    type,
-    placeholder: typeof placeholder === 'undefined' ? tips : placeholder,
-    rules: required ? [{ required: true, message: tips }, ...rules] : rules,
-  }
-}
-
-/**
  * 生成表单局部store
  * @param {Array} list
  */
 export default function madeFormStore(list) {
   const store = vue.observable(initList(list))
+
   const mutation = {
+    /**
+     * 修改表单项
+     * @param {string|number|array|object} v 修改后的值
+     * @param {string|object} item 当前表单项信息或当前字段名
+     */
+    updateList(v, item) {
+      const valueInfo =
+        !Array.isArray(v) && typeof v === 'object' ? v : { value: v }
+      const { originName, parentName, parentIndex } =
+        typeof item === 'object' ? item : { originName: item }
+      const s = parentName ? parentName : originName
+      const index = store.findIndex(({ name }) => name === s)
+      if (parentName) {
+        const subIndex = store[index].children[parentIndex].findIndex(
+          ({ name }) => name === originName
+        )
+        Object.keys(valueInfo).forEach(
+          (key) =>
+            (store[index].children[parentIndex][subIndex][key] = valueInfo[key])
+        )
+      } else {
+        Object.keys(valueInfo).forEach(
+          (key) => (store[index][key] = valueInfo[key])
+        )
+      }
+    },
+    changeList(name, info) {
+      const index = store.findIndex(({ name: m }) => name === m)
+      if (Array.isArray(info)) {
+        store[index].children.push(initList(info))
+      }
+      if (!isNaN(info)) {
+        store[index].children = store[index].children.filter(
+          (f, i) => i !== info
+        )
+      }
+    },
     /**
      * 更新列表
      * @param {string|number|object} v
      * @param {number} index 当前项所在下标
      * @param {string|undefined} originName 原始name
      */
-    updateItem(v, index, originName) {
-      const nextInfo =
-        typeof v === 'object' && !Array.isArray(v) ? v : { value: v }
-      const i =
-        typeof originName === 'string' && originName.trim() !== ''
-          ? getItemIndex(index, originName, store)
-          : index
-      if (i > -1) {
-        // 只能逐项更新
-        Object.keys(nextInfo).forEach((k) => (store[i][k] = nextInfo[k]))
-      } else {
-        throw new Error(`${originName}-${index} is not fund`)
-      }
+    update() {
+      store[2].children[store[2].children.length - 1][0].label = true
+      store[2].children[0][0].label = Date.now()
+      store[0] = { value: 10 }
+      store[0].isShow = !store[0].isShow
     },
+    add() {
+      store[2].children.push([
+        { name: 'top', type: 'slot' },
+        { name: 'customer', label: '客户名称' },
+        { name: 'starAddress', label: '出发地', required: true, value: '' },
+        { name: 'targetAddress', label: '目的地', required: true, value: '' },
+      ])
+    },
+    del() {},
   }
+
   return { store, mutation }
 }

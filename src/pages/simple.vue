@@ -2,15 +2,14 @@
   <div>
     <p>simple</p>
     <ele-form validate-first :list="list" @failed="onFailed" @submit="onSubmit" @change="change">
-      <template v-for="item in list">
-        <template v-if="item.type === 'slot'">
+      <!-- <template v-for="item in list">
+        <template v-if="item.component === 'slot'">
           <div
-            :key="item.nme"
+            :key="item.name"
             :slot="item.name"
-            v-if="item.name.startsWith('top_list')"
           >top--{{item}}</div>
         </template>
-      </template>
+      </template> -->
       <div slot="button">
         <van-button round block type="info" native-type="submit">提交</van-button>
       </div>
