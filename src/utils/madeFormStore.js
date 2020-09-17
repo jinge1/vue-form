@@ -50,7 +50,7 @@ function initList(list) {
 export default function madeFormStore(list) {
   // 当前状态
   const store = vue.observable({
-    list: initList(list),
+    list: initList(list)
   })
 
   // 操作store的方法
@@ -134,6 +134,9 @@ export default function madeFormStore(list) {
       // })
       // console.log(arr)
       // arr.forEach()
+    },
+    test() {
+      store.list = store.list.filter(({ name }) => name !== 'mobile')
     },
   }
 

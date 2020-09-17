@@ -4,6 +4,7 @@
       <van-button round type="info" @click="add">添加</van-button>
       <van-button round type="info" @click="del">删除</van-button>
       <van-button round type="info" @click="reset">重置</van-button>
+      <van-button round type="info" @click="test">测试</van-button>
     </div>
     <ele-form
       validate-first
@@ -83,7 +84,7 @@ export default {
   computed: {
     list() {
       return store.list
-    },
+    }
   },
 }
 </script>
