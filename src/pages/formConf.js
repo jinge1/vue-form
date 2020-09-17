@@ -1,7 +1,6 @@
 // import madeFormStore from '../utils/madeFormStore'
 
 const conf = [
-  { name: 'top666', component: 'slot' },
   { name: 'user', isShow: true, label: '用户名', placeholder: '请输入用户名' },
   { name: 'mobile', label: '手机号', placeholder: '请输入手机号' },
   {
@@ -17,13 +16,8 @@ const child = [
   { name: 'targetAddress', label: '目的地', required: true, value: '' },
 ]
 
+// const { store, mutation } = madeFormStore(conf)
+
+// export {store, mutation, conf, child}
+
 export {conf, child}
-
-// 初始值
-// const initValues = {}
-
-// const { store, mutation } = madeFormStore(conf, initValues)
-
-// export default madeFormStore
-
-// export { store, mutation }

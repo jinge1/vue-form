@@ -3,6 +3,7 @@
     <div>
       <van-button round type="info" @click="add">添加</van-button>
       <van-button round type="info" @click="del">删除</van-button>
+      <van-button round type="info" @click="reset">重置</van-button>
     </div>
     <ele-form
       validate-first
@@ -25,6 +26,7 @@
 <script>
 import EleForm from '../components/EleForm'
 import madeFormStore from '../utils/madeFormStore'
+// import { store, mutation, child } from './formConf'
 import { conf, child } from './formConf'
 const { store, mutation } = madeFormStore(conf)
 
@@ -36,7 +38,11 @@ export default {
     return {
       values: {},
       slotsList: {},
+      store: [],
     }
+  },
+  created() {
+    // console.log(890)
   },
   methods: {
     ...mutation,
@@ -45,6 +51,10 @@ export default {
     },
     del() {
       this.changeList('list', 0)
+      // this.changeList('list')
+    },
+    reset() {
+      this.resetList(conf)
     },
     onFailed(info) {
       console.log(info)

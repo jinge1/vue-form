@@ -18,6 +18,7 @@ function formatItem(item) {
   if (component === 'slot') {
     return { isShow, ...item }
   }
+  // 若该项有children项，则不用默认给value
   const valueInfo = Array.isArray(item.children) ? {} : { value: '' }
   return {
     component,
@@ -30,7 +31,7 @@ function formatItem(item) {
 }
 
 /**
- * 初始化表单项，逐项增加默认值
+ * 初始化表单项，逐项增加默认值，目前仅支持一级children
  * @param {Array} list 表单列表
  */
 function initList(list) {
@@ -47,8 +48,10 @@ function initList(list) {
  * @param {Array} list
  */
 export default function madeFormStore(list) {
+  // 当前状态
   const store = vue.observable(initList(list))
 
+  // 操作store的方法
   const mutation = {
     /**
      * 修改表单项(如修改值，控制显示隐藏，其他配置，配置项同vant)
@@ -60,20 +63,25 @@ export default function madeFormStore(list) {
         !Array.isArray(v) && typeof v === 'object' ? v : { value: v }
       const itemInfo = typeof item === 'object' ? item : { name: item }
       const { name, parentName, parentIndex } = itemInfo
+      // 通过是否有parentName来判断当前项是否为子集，若为子集，首相找出父级所在index
       const s = parentName ? parentName : name
       const index = store.findIndex(({ name }) => name === s)
+      // 查找当前项失败
       if (index === -1) {
         console.error(`${s} is not found!`)
         return false
       }
       if (parentName) {
+        // 若有父级则判断子集情况
         if (
           !Array.isArray(store[index].children) ||
           !Array.isArray(store[index].children[parentIndex])
         ) {
+          // 父级中parentIndex项不存在
           console.error(`${parentName}-${parentIndex} is not array!`)
           return false
         }
+        // 待修改项所在父级中的index值
         const subIndex = store[index].children[parentIndex].findIndex(
           ({ name: n }) => n === name
         )
@@ -92,7 +100,7 @@ export default function madeFormStore(list) {
       }
     },
     /**
-     * 新增或删除表单项
+     * 新增或删除表单列表项
      * @param {string|number} name 修改项名称
      * @param {number|array} info 若为数字，则为需要删除的下标，若为数组，则为需要新增的内容
      */
@@ -104,6 +112,9 @@ export default function madeFormStore(list) {
         console.error(`${name} is not found!`)
         return false
       }
+      if (typeof info === 'undefined') {
+        store[index].children = []
+      }
       if (Array.isArray(info)) {
         store[index].children.push(initList(info))
       }
@@ -113,6 +124,14 @@ export default function madeFormStore(list) {
         )
       }
     },
+    resetList(arr){
+      // store = []
+      // store.forEach(({name, children})=> {
+
+      // })
+      // console.log(arr)
+      // arr.forEach()
+    }
   }
 
   return { store, mutation }
