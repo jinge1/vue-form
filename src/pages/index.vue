@@ -24,7 +24,9 @@
 </template>
 <script>
 import EleForm from '../components/EleForm'
-import { store, mutation } from './formConf'
+import madeFormStore from '../utils/madeFormStore'
+import { conf, child } from './formConf'
+const { store, mutation } = madeFormStore(conf)
 
 export default {
   components: {
@@ -39,11 +41,7 @@ export default {
   methods: {
     ...mutation,
     add() {
-      this.changeList('list', [
-        { name: 'cc0', component: 'slot' },
-        { name: 'cc', label: 'add' },
-        { name: 'cc2', label: 'add2' },
-      ])
+      this.changeList('list', child)
     },
     del() {
       this.changeList('list', 0)
@@ -55,20 +53,20 @@ export default {
       console.log(values)
     },
     change(v, item) {
-      this.updateList(v, item)
-      if (item.originName === 'customer') {
-        this.updateList(
+      this.updateItem(v, item)
+      if (item.name === 'customer') {
+        this.updateItem({ required: true }, 'mobile')
+      }
+      if (item.name === 'mobile') {
+        this.updateItem(
           { required: false },
           {
-            originName: 'targetAddress',
+            name: 'targetAddress',
             parentName: 'list',
-            parentIndex: item.parentIndex,
+            parentIndex: 0,
+            // parentIndex: item.parentIndex,
           }
         )
-        // this.updateList(
-        //   { required: true },
-        //   'mobile'
-        // )
       }
     },
   },

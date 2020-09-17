@@ -1,7 +1,7 @@
 <template>
   <van-form validate-first v-on="$listeners">
     <template v-for="item in formList">
-      <template v-if="item.isShow !== false">
+      <template v-if="item.isShow !== false ">
         <slot v-if="item.component === 'slot'" :name="item.name"></slot>
         <ele-input v-else v-bind="item" @input="change($event, item)" :key="item.name"></ele-input>
       </template>
@@ -31,7 +31,6 @@ export default {
   },
   methods: {
     init() {
-      console.log('init---')
       this.$emit('update:slotsList', this.getSlotsList())
       this.$emit('update:values', this.getValues())
     },
@@ -59,7 +58,7 @@ export default {
       }, [])
     },
     change(v, item) {
-      this.$emit('change', v, item)
+      this.$emit('change', v, { ...item, name: item.originName })
       // console.log(list, '----')
       // this.$nextTick(() => this.init())
     },
