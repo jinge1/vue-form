@@ -54,7 +54,7 @@ export default {
       // this.changeList('list')
     },
     reset() {
-      this.resetList(conf)
+      this.resetList()
     },
     onFailed(info) {
       console.log(info)
@@ -82,7 +82,7 @@ export default {
   },
   computed: {
     list() {
-      return store
+      return store.list
     },
   },
 }

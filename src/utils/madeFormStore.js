@@ -49,7 +49,9 @@ function initList(list) {
  */
 export default function madeFormStore(list) {
   // 当前状态
-  const store = vue.observable(initList(list))
+  const store = vue.observable({
+    list: initList(list),
+  })
 
   // 操作store的方法
   const mutation = {
@@ -65,7 +67,7 @@ export default function madeFormStore(list) {
       const { name, parentName, parentIndex } = itemInfo
       // 通过是否有parentName来判断当前项是否为子集，若为子集，首相找出父级所在index
       const s = parentName ? parentName : name
-      const index = store.findIndex(({ name }) => name === s)
+      const index = store.list.findIndex(({ name }) => name === s)
       // 查找当前项失败
       if (index === -1) {
         console.error(`${s} is not found!`)
@@ -74,15 +76,15 @@ export default function madeFormStore(list) {
       if (parentName) {
         // 若有父级则判断子集情况
         if (
-          !Array.isArray(store[index].children) ||
-          !Array.isArray(store[index].children[parentIndex])
+          !Array.isArray(store.list[index].children) ||
+          !Array.isArray(store.list[index].children[parentIndex])
         ) {
           // 父级中parentIndex项不存在
           console.error(`${parentName}-${parentIndex} is not array!`)
           return false
         }
         // 待修改项所在父级中的index值
-        const subIndex = store[index].children[parentIndex].findIndex(
+        const subIndex = store.list[index].children[parentIndex].findIndex(
           ({ name: n }) => n === name
         )
         if (subIndex === -1) {
@@ -91,11 +93,12 @@ export default function madeFormStore(list) {
         }
         Object.keys(valueInfo).forEach(
           (key) =>
-            (store[index].children[parentIndex][subIndex][key] = valueInfo[key])
+            (store.list[index].children[parentIndex][subIndex][key] =
+              valueInfo[key])
         )
       } else {
         Object.keys(valueInfo).forEach(
-          (key) => (store[index][key] = valueInfo[key])
+          (key) => (store.list[index][key] = valueInfo[key])
         )
       }
     },
@@ -106,32 +109,32 @@ export default function madeFormStore(list) {
      */
     changeList(name, info) {
       const index = isNaN(name)
-        ? store.findIndex(({ name: m }) => name === m)
+        ? store.list.findIndex(({ name: m }) => name === m)
         : name
       if (index === -1) {
         console.error(`${name} is not found!`)
         return false
       }
       if (typeof info === 'undefined') {
-        store[index].children = []
+        store.list[index].children = []
       }
       if (Array.isArray(info)) {
-        store[index].children.push(initList(info))
+        store.list[index].children.push(initList(info))
       }
       if (!isNaN(info)) {
-        store[index].children = store[index].children.filter(
+        store.list[index].children = store.list[index].children.filter(
           (f, i) => i !== info
         )
       }
     },
-    resetList(arr){
+    resetList() {
+      store.list = initList(list)
       // store = []
       // store.forEach(({name, children})=> {
-
       // })
       // console.log(arr)
       // arr.forEach()
-    }
+    },
   }
 
   return { store, mutation }
