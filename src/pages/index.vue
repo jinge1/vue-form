@@ -1,12 +1,16 @@
 <template>
   <div>
-    <ele-form
-      validate-first
-      @failed="onFailed"
-      :store="store"
-      :mutation="mutation"
-      @submit="onSubmit"
-    >
+    <p>simple</p>
+    <ele-form validate-first :list="list" @failed="onFailed" @submit="onSubmit" @change="change">
+      <template v-for="item in list">
+        <template v-if="item.type === 'slot'">
+          <div
+            :key="item.nme"
+            :slot="item.name"
+            v-if="item.name.startsWith('top_list')"
+          >top--{{item}}</div>
+        </template>
+      </template>
       <div slot="button">
         <van-button round block type="info" native-type="submit">提交</van-button>
       </div>
@@ -15,49 +19,34 @@
 </template>
 <script>
 import EleForm from '../components/EleForm'
-import madeStore from './store'
-
-const formList = [
-  // type slot array form-input form-select
-  { name: 'name1', type: 'slot' },
-  { name: 'name2', label: '用户名2', required: true },
-  { name: 'name3', label: '用户名3', on: { input: (v) => console.log(v) } },
-  {
-    name: 'list',
-    type: 'array',
-    items: [
-      { name: 'name4', label: '用户名4', rules: [{ required: true }] },
-      { name: 'name5' },
-    ],
-  },
-  {
-    name: 'list2',
-    type: 'array',
-    items: [
-      { name: 'name4', label: '用户名4', rules: [{ required: true }] },
-      { name: 'name6' },
-    ],
-  },
-]
-const { store, mutation } = madeStore(formList)
-
+import { store, mutation } from './formConf'
 export default {
   components: {
-    'ele-form': EleForm,
-  },
-  data() {
-    return {
-      // value: Date.now()
-      store,
-      mutation,
-    }
+    EleForm,
   },
   methods: {
+    ...mutation,
+    change(v, index, item) {
+      const { originName, parentIndex } = item
+      this.updateItem(v, index)
+      if (originName === 'starAddress') {
+        this.updateItem(
+          { isShow: false, value: 'hello' },
+          parentIndex,
+          'targetAddress'
+        )
+      }
+    },
     onFailed(info) {
       console.log(info)
     },
     onSubmit(values) {
       console.log(values)
+    },
+  },
+  computed: {
+    list() {
+      return store
     },
   },
 }
