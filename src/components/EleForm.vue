@@ -58,7 +58,7 @@ export default {
       }, [])
     },
     change(v, item) {
-      this.$emit('change', v, { ...item, name: item.originName })
+      this.$emit('change', { ...item, name: item.originName }, v)
       // console.log(list, '----')
       // this.$nextTick(() => this.init())
     },
