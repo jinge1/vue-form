@@ -2,13 +2,20 @@
   <div id="app" class="app">
     <div class="bar">
       <div class="bar-inner">
-        <van-nav-bar title="标题" left-text="返回" left-arrow @click-left="onClickLeft" />
+        <van-nav-bar title="标题" v-bind="backInfo" @click-left="onClickLeft" />
       </div>
       <div class="bar-block"></div>
     </div>
-    <router-view></router-view>
+    <div class="page">
+      <router-view></router-view>
+    </div>
     <van-tabbar v-model="active" @change="onChange">
-      <van-tabbar-item :icon="icon" v-for="({path, tag, icon}) in links" :key="path">{{tag}}</van-tabbar-item>
+      <van-tabbar-item
+        :icon="icon"
+        v-for="{ path, tag, icon } in links"
+        :key="path"
+        >{{ tag }}</van-tabbar-item
+      >
     </van-tabbar>
   </div>
 </template>
@@ -22,21 +29,49 @@ export default {
         { path: '/simple', tag: '标签', icon: 'search' },
         { path: '/simple2', tag: '标签', icon: 'search' },
       ],
+      backInfo: {},
     }
   },
   methods: {
+    /**
+     * 头部返回处理
+     */
     onClickLeft() {
       this.$router.go(-1)
     },
+    /**
+     * 底部导航切换
+     */
     onChange(index) {
       const { links } = this
       this.$router.push(links[index].path)
+    },
+    /**
+     * 首页不展示头部返回键
+     */
+    changeRoute() {
+      const { $route } = this
+      const { path } = $route
+      this.backInfo = ['/', '/index'].includes(path)
+        ? {}
+        : { leftText: '返回', leftArrow: true }
+    },
+  },
+  watch: {
+    /**
+     * 监听路由
+     */
+    $route: {
+      immediate: true,
+      handler() {
+        this.changeRoute()
+      },
     },
   },
 }
 </script>
 <style scoped>
-.app{
+.app {
   padding: 0 0 60px 0;
 }
 .bar-inner {

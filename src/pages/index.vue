@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="comm-page">
     <div>
       <van-button round type="info" @click="add">添加</van-button>
       <van-button round type="info" @click="del">删除</van-button>
@@ -27,8 +27,8 @@
   </div>
 </template>
 <script>
-import EleForm from '../components/EleForm'
-import madeFormStore from '../utils/madeFormStore'
+import EleForm from '@/components/EleForm'
+import madeFormStore from '@/utils/madeFormStore'
 // import { store, mutation, child } from './formConf'
 import { conf, child } from './formConf'
 const { store, mutation } = madeFormStore(conf)
@@ -46,7 +46,7 @@ export default {
   },
   created() {
     // console.log(890)
-    this.updateList('list', child)
+    // this.updateList('list', child)
   },
   methods: {
     ...mutation,
