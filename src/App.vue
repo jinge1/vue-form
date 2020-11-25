@@ -50,8 +50,13 @@ export default {
      * 首页不展示头部返回键
      */
     changeRoute() {
-      const { $route } = this
+      const { $route, links } = this
       const { path } = $route
+      const index = links.findIndex((l) => l.path === path)
+      if (index > -1) {
+        // 修正当前路由高亮问题
+        this.active = index
+      }
       this.backInfo = ['/', '/index'].includes(path)
         ? {}
         : { leftText: '返回', leftArrow: true }

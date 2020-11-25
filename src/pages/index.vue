@@ -46,7 +46,7 @@ export default {
   },
   created() {
     // console.log(890)
-    // this.updateList('list', child)
+    this.updateList('list', child)
   },
   methods: {
     ...mutation,
